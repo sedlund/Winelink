@@ -25,8 +25,6 @@ To run Windows .exe files on RPi4 (ARM/Linux), we need an x86 emulator ([Box86](
 ## Known issues
  - ARDOP & VARA often have trouble connecting to RMS Express over TCP when they first start. If ARDOP fails to connect, just restart RMS Express it until it does connect (this is a bug in wine).
  - VARA's CPU gauge doesn't display (this is a bug in wine).
- - I haven't tested over-the-air connections since I'm just a tech.  If some generals could test, that would be awesome.
- - RMS Express v1.5.41.0 introduced a requirement for .NET 4.6 (instead of just .NET 3.5sp1). This updated has forced us to use wine-mono instead of .NET.  Wine-mono may have some bugs. Madewokherd (Esme), the wine-mono dev, is amazing though - they have fixed all of the bugs we've encountered so far.
     
 ## Credits
  - [ptitSeb](https://github.com/ptitSeb/box86) for box86 debugging (& everyone on [the TwisterOS discord](https://discord.gg/Fh8sjmu))
@@ -50,8 +48,8 @@ All software used by this script is free and legal to use (with the exception of
  - [ ] Add an AHK script to help the user with ARDOP first time soundcard setup.
  - [ ] Consider adding a sed script to find/delete any small-value frequencies in `RMS Channels.dat` that would crash the HF Channel Selection Browser
  - [ ] Clean up code with [Google style guide](https://google.github.io/styleguide/shellguide.html).
- - [ ] Work with the Wine team to [figure out why VARA's CPU gauge isn't working](https://bugs.winehq.org/show_bug.cgi?id=50728).
- - [ ] Work with the Wine team to [figure out why ARDOP & VARA don't always connect to RMS Express over TCP when first starting](https://bugs.winehq.org/show_bug.cgi?id=52521).
+ - [ ] Work with WineHQ to [figure out why VARA's CPU gauge isn't working](https://bugs.winehq.org/show_bug.cgi?id=50728).
+ - [ ] Work with WineHQ to [figure out why ARDOP & VARA don't always connect to RMS Express over TCP when first starting](https://bugs.winehq.org/show_bug.cgi?id=52521).
  - [ ] Add 'splash screen' to RMS Express desktop shortcut (since launching takes a while)
  - [x] Rely on [archive.org box86 binaries](https://archive.org/details/box86.7z_20200928) instead of compiling.
     - [ ] Give user the choice to compile or not.
