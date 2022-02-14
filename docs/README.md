@@ -34,7 +34,7 @@ To run Windows .exe files on RPi4 (ARM/Linux), we need an x86 emulator ([Box86](
 
  - [madewokherd](https://github.com/madewokherd/wine-mono) (Esme) for wine-mono debugging
  - N7ACW, AD7HE, & KK6FVG for getting me started in ham radio
- - [KM4ACK](https://github.com/km4ack/pi-build) & OH8STN for inspiration
+ - [KM4ACK](https://github.com/km4ack/pi-build) & [OH8STN](https://oh8stn.org/) for inspiration
  - [K6ETA](http://k6eta.com/linux/installing-rms-express-on-linux-with-wine) & [DCJ21](https://dcj21net.wordpress.com/2016/06/17/install-rms-express-linux/)'s 'Winlink on Linux' guides for early proof-of-concept
 
          "My humanity is bound up in yours, for we can only be human together"
