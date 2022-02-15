@@ -51,6 +51,7 @@ All software used by this script is free and legal to use (with the exception of
  - [ ] Work with WineHQ to [figure out why VARA's CPU gauge isn't working](https://bugs.winehq.org/show_bug.cgi?id=50728).
  - [ ] Work with WineHQ to [figure out why ARDOP & VARA don't always connect to RMS Express over TCP when first starting](https://bugs.winehq.org/show_bug.cgi?id=52521).
  - [ ] Add 'splash screen' to RMS Express desktop shortcut (since launching takes a while)
+ - [ ] Add progress bar (GUI?) for installation.
  - [x] Rely on [archive.org box86 binaries](https://archive.org/details/box86.7z_20200928) instead of compiling.
     - [ ] Give user the choice to compile or not.
     - [ ] Add auto-detection of failed downloads, then switch to compiling as contingency.
