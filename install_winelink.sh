@@ -223,21 +223,14 @@ function run_setupwineprefix_varaonly()  # TODO: This function is probably redun
         clear
 }
 
-function run_installwinemono()  # Wine-mono replaces MS.NET 4.6 and earlier.  MS.NET 4.6 takes a very long time to install on RPi4 in Wine
+function run_installwinemono()  # Wine-mono replaces MS.NET 4.6 and earlier.
 {
+    # MS.NET 4.6 takes a very long time to install on RPi4 in Wine and runs slower than wine-mono
     sudo apt-get install p7zip-full -y
-    
     mkdir ~/.cache/wine 2>/dev/null
     echo -e "\n${GREENTXT}Downloading and installing wine-mono . . .${NORMTXT}\n"
-    #wget -q -P ~/.cache/wine https://github.com/madewokherd/wine-mono/releases/download/wine-mono-6.4.1/wine-mono-6.4.1-x86.msi || { echo "wine-mono .msi install file download failed!" && run_giveup; }
-    #wine msiexec /i ~/.cache/wine/wine-mono-6.4.1-x86.msi # TODO: Updated this to an official release version of wine-mono that includes fixes for COM ports (as soon as link is available)
-    
-        # Kludge: Use a 'nightly build' of wine-mono until official wine-mono 7.1.3 is released
-        # Link from https://github.com/madewokherd/mono/actions/runs/1773995893 (https://github.com/madewokherd/mono/pull/22)
-        wget -q -P ~/.cache/wine https://nightly.link/madewokherd/mono/actions/artifacts/154265073.zip || { echo "wine-mono .msi install file download failed!" && run_giveup; }
-        7z x ~/.cache/wine/154265073.zip -o"$HOME/.cache/wine/"
-        wine msiexec /i ~/.cache/wine/wine-mono-7.1.1-x86.msi # wine-mono-7.1.1 might require wine-devel 6.19 or newer
-    
+    wget -q -P ~/.cache/wine https://github.com/madewokherd/wine-mono/releases/download/wine-mono-7.1.3/wine-mono-7.1.3-x86.msi || { echo "wine-mono .msi install file download failed!" && run_giveup; }
+    wine msiexec /i ~/.cache/wine/wine-mono-7.1.3-x86.msi
     rm -rf ~/.cache/wine # clean up to save disk space
 }
 
