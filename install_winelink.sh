@@ -311,6 +311,7 @@ function run_installrms()  # Download/extract/install RMS Express
             echo '[Desktop Entry]'                                                                             >> ~/Desktop/Winlink\ Express.desktop
             echo 'Name=Winlink Express'                                                                        >> ~/Desktop/Winlink\ Express.desktop
             echo 'Exec=env BOX86_DYNAREC_BIGBLOCK=0 wine '$HOME'/.wine/drive_c/RMS\ Express/RMS\ Express.exe'  >> ~/Desktop/Winlink\ Express.desktop
+            #echo 'Exec=env BOX86_DYNAREC_BIGBLOCK=0 BOX86_DYNAREC_STRONGMEM=1 wine '$HOME'/.wine/drive_c/RMS\ Express/RMS\ Express.exe'  >> ~/Desktop/Winlink\ Express.desktop # TODO: Does this improve stability or cost speed?
             echo 'Type=Application'                                                                            >> ~/Desktop/Winlink\ Express.desktop
             echo 'StartupNotify=true'                                                                          >> ~/Desktop/Winlink\ Express.desktop
             echo 'Icon=219D_RMS Express.0'                                                                     >> ~/Desktop/Winlink\ Express.desktop
