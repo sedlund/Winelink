@@ -503,7 +503,7 @@ function run_installvara()  # Download / extract / install VARA HF/FM/Chat, then
     
     # Install dll's needed by users of "RA-boards," like the DRA-50
     #  https://masterscommunications.com/products/radio-adapter/dra/dra-index.html
-        sudo apt install p7zip-full -y
+        sudo apt-get install p7zip-full -y
         BOX86_NOBANNER=1 winetricks -q hid
         wget http://uz7.ho.ua/modem_beta/ptt-dll.zip
         7z x ptt-dll.zip -o"$HOME/.wine/drive_c/VARA/" # For VARA HF & VARAChat
