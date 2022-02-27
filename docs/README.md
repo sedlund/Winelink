@@ -124,11 +124,12 @@ All software used by this script is free and legal to use (with the exception of
  - [ ] Make a youtube video showcasing current methods (box86, Exagear issues, qemu-user-static errors, Pi4B, Pi3B+, Termux, Mac, Linux, ChromeOS)
  
  - Android testing notes (Termux/PRoot/AnBox86_64)
-     - [x] Proof of concept https://youtu.be/FkeP_IW3GGQ?t=23
-     - [x] Audio in/out (ARDOP works with alsa / hiccups with pulseaudio)
-     - [ ] Speed benchmarks with different devices (Fire HD10 Tablet is a bit slow, Retroid Pocket 2 TBD)
-     - [ ] OTG-USB-CAT (order OTG_USB_C-USB)
+     - [ ] Termux-usb seems to need root to really work. See if there is a work-around for no root?
      - [ ] Create alpha version of Winelink for AnBox86_64
+     - [ ] Speed benchmarks with different devices (Fire HD10 Tablet is a bit slow, Retroid Pocket 2 TBD)
+     - [x] OTG-USB-CAT (order OTG_USB_C-USB)
+     - [x] Audio in/out (ARDOP works with alsa / hiccups with pulseaudio)
+     - [x] Proof of concept https://youtu.be/FkeP_IW3GGQ?t=23
 
 ## Distribution
 If you use this script in your project (or are inspired by it) just please be sure to mention ptitSeb, Box86, and myself (KI7POL).  This script is free to use, open-source, and should not be monetized (for further information see the [license file](LICENSE)).
