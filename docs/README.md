@@ -23,7 +23,7 @@ This script will help you install Box86, Wine, winetricks, Windows DLL's, RMS Ex
 To run Windows .exe files on RPi4 (ARM/Linux), we need an x86 emulator ([Box86](https://github.com/ptitSeb/box86)) and a Windows API Call interpreter ([Wine](https://github.com/wine-mirror/wine)).  Box86 is open-source and runs about 10x faster than [ExaGear](https://www.huaweicloud.com/kunpeng/software/exagear.html) or [Qemu](https://github.com/qemu/qemu).  ExaGear is also closed source abandonware and Qemu (qemu-system & qemu-user-static) also has issues running more complex Wine programs on the Pi.  Box86 is much smaller in file size and much easier to install too.
 
 ## Known issues
- - ARDOP & VARA often have trouble connecting to RMS Express over TCP when they first start. If ARDOP fails to connect, just restart RMS Express it until it does connect (this is a bug in wine).
+ - ARDOP & VARA often have trouble connecting to RMS Express (over local TCP) when they first start up. Just restart RMS Express until they do connect (this is a bug in wine).
  - VARA's CPU gauge doesn't display (this is a bug in wine).
     
 ## Credits
@@ -85,14 +85,16 @@ All software used by this script is free and legal to use (with the exception of
  #### Add more platforms (make a multi-platform [Wine](https://wiki.winehq.org/Download) installer & build/invoke box86 if needed).
  - [x] Auto-detection of system arch (x86 vs armhf vs aarch64) & OS.
     - ARM
-      - [x] Raspberry Pi 4B
+      - [x] Raspberry Pi 4B (32-bit OS)
+      - [ ] Raspberry Pi 4B (64-bit OS)
       - [ ] Raspberry Pi 3B+
         - [ ] Detect Raspberry Pi kernel memory split (and install the correct kernel if needed) for RPi <4 support.
         - [ ] Ask Botspot if I can borrow some of his [pi-apps code](https://github.com/Botspot/pi-apps/blob/4a48ba62b157420c6e33666e7d050ee3ce21ab0b/apps/Wine%20(x86)/install-32#L165).
       - [ ] RPi Zero 2 W?
       - [ ] RPi Zero W?
-      - [ ] [Termux](https://github.com/termux/termux-app) (Android without root) ([proot-distro](https://github.com/termux/proot-distro) + Ubuntu ARM + [termux-usb](https://wiki.termux.com/wiki/Termux-usb)) - see [AnBox86](https://github.com/lowspecman420/AnBox86) for proof of concept, currently untested with VARA.
+      - [ ] ~[Termux](https://github.com/termux/termux-app) (Android without root) ([proot-distro](https://github.com/termux/proot-distro) + Ubuntu ARM + [termux-usb](https://wiki.termux.com/wiki/Termux-usb)) - see [AnBox86](https://github.com/lowspecman420/AnBox86) for proof of concept, currently untested with VARA.~
         - [x] Fix AnBox86
+        - [ ] See if termux-usb can be adapted somehow to allow connections without root?
     - x86
       - Mac
         - [ ] OSX?
