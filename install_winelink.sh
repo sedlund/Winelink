@@ -1,29 +1,35 @@
 #!/bin/bash
 
+# vi: shiftwidth=4 tabstop=4
+
 function run_greeting()
 {
     clear
-    echo ""
-    echo "########### Winlink & VARA Installer Script for the Raspberry Pi 4B ###########"
-    echo "# Author: Eric Wiessner (KI7POL)                    Install time: apx 30 min  #"
-    echo "# Version: 0.0087a (Work in progress)                                         #"
-    echo "# Credits:                                                                    #"
-    echo "#   The Box86 team (ptitSeb, pale, chills340, Itai-Nelken, Heasterian, et al) #"
-    echo "#   Esme 'madewokherd' Povirk (CodeWeavers) for wine-mono debugging/support   #"
-    echo "#   N7ACW, AD7HE, & KK6FVG for getting me started in ham radio                #"
-    echo "#   KM4ACK & OH8STN for inspiration                                           #"
-    echo "#   K6ETA & DCJ21's Winlink on Linux guides                                   #"
-    echo "#                                                                             #"
-    echo "#    \"My humanity is bound up in yours, for we can only be human together\"    #"
-    echo "#                                                - Nelson Mandela             #"
-    echo "#                                                                             #"
-    echo "# If you like this project please consider donating to Sebastien Chevalier    #"
-    echo "#   (the creator of box86) or CodeWeavers (wine, wine-mono).                  #"
-    echo "#                                                                             #"
-    echo "#                  - Donate to Box86:  paypal.me/0ptitSeb -                   #"
-    echo "#    - Support Esme & CodeWeavers: https://www.codeweavers.com/crossover -    #"
-    echo "#       - Donate to Wine / wine-mono:  https://www.winehq.org/donate -        #"
-    echo "###############################################################################"
+    cat <<- __EOF__
+
+	########### Winlink & VARA Installer Script for the Raspberry Pi 4B ###########
+	# Author: Eric Wiessner (KI7POL)                    Install time: apx 30 min  #
+	# Version: 0.0087a (Work in progress)                                         #
+	# Credits:                                                                    #
+	#   The Box86 team (ptitSeb, pale, chills340, Itai-Nelken, Heasterian, et al) #
+	#   Esme 'madewokherd' Povirk (CodeWeavers) for wine-mono debugging/support   #
+	#   N7ACW, AD7HE, & KK6FVG for getting me started in ham radio                #
+	#   KM4ACK & OH8STN for inspiration                                           #
+	#   K6ETA & DCJ21's Winlink on Linux guides                                   #
+	#                                                                             #
+	#    "My humanity is bound up in yours, for we can only be human together"    #
+	#                                                - Nelson Mandela             #
+	#                                                                             #
+	# If you like this project please consider donating to Sebastien Chevalier    #
+	#   (the creator of box86) or CodeWeavers (wine, wine-mono).                  #
+	#                                                                             #
+	#                  - Donate to Box86:  paypal.me/0ptitSeb -                   #
+	#    - Support Esme & CodeWeavers: https://www.codeweavers.com/crossover -    #
+	#       - Donate to Wine / wine-mono:  https://www.winehq.org/donate -        #
+	###############################################################################
+
+	__EOF__
+
     read -n 1 -s -r -p "Press any key to continue . . ."
     clear
 }
@@ -69,24 +75,19 @@ function run_main()
             exec > >(tee "../winelink.log") 2>&1 # start logging
             run_checkpermissions
             run_checkxhost
-            run_gather_os_info
             #run_detect_arch # TODO: Customize this section to install wine for different operating systems.
-            rm -rf Winelink-tmp winelink.log 2>/dev/null; mkdir Winelink-tmp && cd Winelink-tmp # clean up any failed past runs of this script
+            rm -rf Winelink-tmp winelink.log 2>/dev/null; mkdir Winelink-tmp && cd Winelink-tmp || exit 1 # clean up any failed past runs of this script
             rm ~/Desktop/Reset\ Wine ~/Desktop/Update\ VARA ~/Desktop/VARA.desktop ~/Desktop/VARA\ Chat.desktop ~/Desktop/VARA\ FM.desktop ~/Desktop/Winlink\ Express.desktop 2>/dev/null # remove old winlink/wine desktop shortcuts (in case we are reinstalling wine)
             run_greeting
-        
+
         ### Install Wine & winetricks
-            run_installwine "pi4" "devel" "7.1" "debian" "${VERSION_CODENAME}" "-1" # windows API-call interperter for non-windows OS's - freeze version to ensure compatability
+            run_installwine "pi4" "devel" "7.1" "debian" "$(lsb_release -sc)" "-1" # windows API-call interperter for non-windows OS's - freeze version to ensure compatability
             run_installwinetricks # software installer script for wine
             run_downloadbox86 10_Dec_21 # emulator to run wine-i386 on ARM - freeze version to ensure compatability
-            
+
         ### Set up Wine (silently make & configure a new wineprefix)
-            if [ "$ARG" = "vara_only" ]; then
-                run_setupwineprefix_varaonly
-            else
-                run_setupwineprefix
-            fi
-        
+            [ "$ARG" = "vara_only" ] && run_setupwineprefix_varaonly || run_setupwineprefix
+
         ### Install Winlink & VARA into our configured wineprefix
             if [ "$ARG" = "vara_only" ]; then
                 run_installvara
@@ -95,22 +96,18 @@ function run_main()
                 run_installvara
                 #run_installvARIM
             fi
-        
+
         ### Post-installation
             run_makewineserverkscript
             run_makevaraupdatescript
             clear
             echo -e "\n${GREENTXT}Setup complete.${NORMTXT}\n"
             cd .. && rm -rf Winelink-tmp winelink.log # cleanup
-            
+
         exit
 }
 
-
-
-
 ############################################# Subroutines #############################################
-
 
 function run_checkpermissions()  # Ensure that script is not run as root & that user account has sudo permissions
 {
@@ -119,7 +116,7 @@ function run_checkpermissions()  # Ensure that script is not run as root & that 
         echo -e "\n${GREENTXT}This script must not be run as root or sudo.${NORMTXT}\n"
         run_giveup
     fi
-    
+
     # If user cannot run sudo commands, then exit (since we have lots of sudo commands in this script)
     sudo -l &> /dev/null || SUDOCHECK="no_sudo" # if an error returns from the command 'sudo -l' then set SUDOCHECK to "no_sudo"
     if [ "$SUDOCHECK" = "no_sudo" ]; then
@@ -140,9 +137,9 @@ function run_downloadbox86()  # Download & install Box86. (This function needs a
 {
     sudo apt-get install p7zip-full -y # TODO: remove redundant apt-get installs - put them at top of script.
     local date="$1"
-    
+
     echo -e "\n${GREENTXT}Downloading and installing Box86 . . .${NORMTXT}\n"
-    mkdir box86; cd box86
+    mkdir box86; cd box86 || exit 1
         sudo rm /usr/local/bin/box86 # in case box86 is already installed and running
         wget -q https://archive.org/download/box86.7z_20200928/box86_"$date".7z || { echo "box86_$date download failed!" && run_giveup; }
         7z x box86_"$date".7z
@@ -157,20 +154,20 @@ function run_buildbox86()  # Build & install Box86. (This function needs a commi
 {
     sudo apt-get install cmake git -y
     local commit="$1"
-    
+
     echo -e "\n${GREENTXT}Building and installing Box86 . . .${NORMTXT}\n"
-    mkdir box86; cd box86
-        rm -rf box86-builder; mkdir box86-builder && cd box86-builder/
-            git clone https://github.com/ptitSeb/box86 && cd box86/
-                git checkout "$commit"
-                mkdir build; cd build
-                    cmake .. -DRPI4=1 -DCMAKE_BUILD_TYPE=RelWithDebInfo
-                    make #-j4 may cause crashes in some builds of box86 due to high cpu load
-                    sudo make install # copies box86 files into their directories (/usr/local/bin/box86, /usr/lib/i386-linux-gnu/, /etc/binfmt.d/)
-                cd ..
-            cd ..
-        cd ..
-    cd ..
+
+    mkdir box86 && pushd box86 || exit 1
+        rm -rf box86-builder
+        mkdir box86-builder && cd box86-builder || exit 1
+        git clone https://github.com/ptitSeb/box86 && cd box86 || exit 1
+        git checkout "$commit"
+        mkdir build && cd build || exit 1
+        cmake .. -DRPI4=1 -DCMAKE_BUILD_TYPE=RelWithDebInfo
+        make #-j4 may cause crashes in some builds of box86 due to high cpu load
+        sudo make install # copies box86 files into their directories (/usr/local/bin/box86, /usr/lib/i386-linux-gnu/, /etc/binfmt.d/)
+    popd || exit 1
+
     sudo systemctl restart systemd-binfmt # must be run after first installation of box86 (initializes binfmt configs so any encountered i386 binaries are sent to box86)
 }
 
@@ -191,11 +188,11 @@ function run_setupwineprefix()  # Set up a new wineprefix silently.  A wineprefi
     # Guide the user to the wineconfig audio menu (configure hardware soundcard input/output)
         sudo apt-get install zenity -y
         clear
-        echo ""
+        echo
         echo -e "\n${GREENTXT}In winecfg, go to the Audio tab to set up your system's in/out soundcards.\n(please click 'Ok' on the user prompt textbox to continue)${NORMTXT}"
         zenity --info --height 100 --width 350 --text="We will now setup your soundcards for Wine. \n\nPlease navigate to the Audio tab and choose your systems soundcards \n\nInstall will continue once you have closed the winecfg menu." --title="Wine Soundcard Setup"
         echo -e "${GREENTXT}Loading winecfg now . . .${NORMTXT}\n"
-        echo ""
+        echo
         BOX86_NOBANNER=1 winecfg # nobanner just for prettier terminal
         clear
 }
@@ -214,11 +211,11 @@ function run_setupwineprefix_varaonly()  # TODO: This function is probably redun
     # Guide the user to the wineconfig audio menu (configure hardware soundcard input/output)
         sudo apt-get install zenity -y
         clear
-        echo ""
+        echo
         echo -e "\n${GREENTXT}In winecfg, go to the Audio tab to set up your system's in/out soundcards.\n(please click 'Ok' on the user prompt textbox to continue)${NORMTXT}"
         zenity --info --height 100 --width 350 --text="We will now setup your soundcards for Wine. \n\nPlease navigate to the Audio tab and choose your systems soundcards \n\nInstall will continue once you have closed the winecfg menu." --title="Wine Soundcard Setup"
         echo -e "${GREENTXT}Loading winecfg now . . .${NORMTXT}\n"
-        echo ""
+        echo
         BOX86_NOBANNER=1 winecfg # nobanner just for prettier terminal
         clear
 }
@@ -226,18 +223,18 @@ function run_setupwineprefix_varaonly()  # TODO: This function is probably redun
 function run_installwinemono()  # Wine-mono replaces MS.NET 4.6 and earlier.  MS.NET 4.6 takes a very long time to install on RPi4 in Wine
 {
     sudo apt-get install p7zip-full -y
-    
+
     mkdir ~/.cache/wine 2>/dev/null
     echo -e "\n${GREENTXT}Downloading and installing wine-mono . . .${NORMTXT}\n"
     #wget -q -P ~/.cache/wine https://github.com/madewokherd/wine-mono/releases/download/wine-mono-6.4.1/wine-mono-6.4.1-x86.msi || { echo "wine-mono .msi install file download failed!" && run_giveup; }
     #wine msiexec /i ~/.cache/wine/wine-mono-6.4.1-x86.msi # TODO: Updated this to an official release version of wine-mono that includes fixes for COM ports (as soon as link is available)
-    
+
         # Kludge: Use a 'nightly build' of wine-mono until official wine-mono 7.1.3 is released
         # Link from https://github.com/madewokherd/mono/actions/runs/1773995893 (https://github.com/madewokherd/mono/pull/22)
         wget -q -P ~/.cache/wine https://nightly.link/madewokherd/mono/actions/artifacts/154265073.zip || { echo "wine-mono .msi install file download failed!" && run_giveup; }
         7z x ~/.cache/wine/154265073.zip -o"$HOME/.cache/wine/"
         wine msiexec /i ~/.cache/wine/wine-mono-7.1.1-x86.msi # wine-mono-7.1.1 might require wine-devel 6.19 or newer
-    
+
     rm -rf ~/.cache/wine # clean up to save disk space
 }
 
@@ -255,7 +252,7 @@ function run_installwine()  # Download and install Wine for i386 Debian Buster (
     wineserver -k &> /dev/null # stop any old wine installations from running - TODO: double-check this command
     rm -rf ~/.cache/wine # remove any old wine-mono or wine-gecko install files in case wine was installed previously
     rm -rf ~/.local/share/applications/wine # remove any old program shortcuts
-    mkdir downloads 2>/dev/null; cd downloads
+    mkdir downloads 2>/dev/null && cd downloads || exit 1
         # Backup any old wine installs
             rm -rf ~/wine-old 2>/dev/null; mv ~/wine ~/wine-old 2>/dev/null
             rm -rf ~/.wine-old 2>/dev/null; mv ~/.wine ~/.wine-old 2>/dev/null
@@ -288,22 +285,22 @@ function run_installwinetricks() # Download and install winetricks
 {
     sudo apt-get remove winetricks -y
     sudo apt-get install cabextract -y # winetricks needs this
-    mkdir downloads 2>/dev/null; cd downloads
+    mkdir downloads 2>/dev/null && cd downloads || exit 1
         echo -e "\n${GREENTXT}Downloading and installing winetricks . . .${NORMTXT}\n"
         sudo mv /usr/local/bin/winetricks /usr/local/bin/winetricks-old 2>/dev/null # backup any old winetricks installs
         wget -q https://raw.githubusercontent.com/Winetricks/winetricks/master/src/winetricks || { echo "winetricks download failed!" && run_giveup; } # download
-        sudo chmod +x winetricks
+        chmod +x winetricks
         sudo mv winetricks /usr/local/bin # install
     cd ..
 }
 
 function run_installrms()  # Download/extract/install RMS Express
 {
-    mkdir downloads 2>/dev/null; cd downloads
+    mkdir downloads 2>/dev/null && cd downloads || exit 1
         # Download RMS Express (no matter its version number) [https://downloads.winlink.org/User%20Programs/]
             echo -e "\n${GREENTXT}Downloading and installing RMS Express . . .${NORMTXT}\n"
             wget -q -r -l1 -np -nd -A "Winlink_Express_install_*.zip" https://downloads.winlink.org/User%20Programs || { echo "RMS Express download failed!" && run_giveup; }
-        
+
         # We could also use curl if we don't want to use wget to find the link . . .
             #RMSLINKPREFIX="https://downloads.winlink.org"
             #RMSLINKSUFFIX=$(curl -s https://downloads.winlink.org/User%20Programs/ | grep -oP '(?=/User%20Programs/Winlink_Express_install_).*?(\.zip).*(?=">Winlink_Express_install_)')
@@ -313,7 +310,7 @@ function run_installrms()  # Download/extract/install RMS Express
         # Extract/install RMS Express
             7z x Winlink_Express_install_*.zip -o"WinlinkExpressInstaller"
             wine WinlinkExpressInstaller/Winlink_Express_install.exe /SILENT
-            
+
         # Make a RMS Express desktop shortcut
             echo '[Desktop Entry]'                                                                             >> ~/Desktop/Winlink\ Express.desktop
             echo 'Name=Winlink Express'                                                                        >> ~/Desktop/Winlink\ Express.desktop
@@ -323,15 +320,15 @@ function run_installrms()  # Download/extract/install RMS Express
             echo 'Icon=219D_RMS Express.0'                                                                     >> ~/Desktop/Winlink\ Express.desktop
             echo 'StartupWMClass=rms express.exe'                                                              >> ~/Desktop/Winlink\ Express.desktop
             #cp ~/.local/share/applications/wine/Programs/RMS\ Express/Winlink\ Express.desktop ~/Desktop/ # sometimes wine makes broken links
-            sudo chmod +x ~/Desktop/Winlink\ Express.desktop
+            chmod +x ~/Desktop/Winlink\ Express.desktop
     cd ..
 }
 
 function run_installvara()  # Download / extract / install VARA HF/FM/Chat, then configure them with AutoHotKey scripts
 {
     sudo apt-get install curl megatools p7zip-full -y
-    
-    mkdir downloads 2>/dev/null; cd downloads
+
+    mkdir downloads 2>/dev/null && cd downloads || exit 1
         # Download / extract VARA HF
             # files: VARA HF v4.4.3 Setup > VARA setup (Run as Administrator).exe > /SILENT install has an OK button at end
             echo -e "\n${GREENTXT}Downloading VARA HF . . .${NORMTXT}\n"
@@ -340,7 +337,7 @@ function run_installvara()  # Download / extract / install VARA HF/FM/Chat, then
             7z x VARA\ HF*.zip -o"VARAHFInstaller"
             cp VARAHFInstaller/VARA\ setup*.exe ~/.wine/drive_c/ # move VARA installer here (so AHK can find it later)
             # VARA HF will be installed and configured with an AHK script later
-        
+
         # Download / extract VARA FM
             # files: VARA FM v4.1.3 Setup.zip > VARA FM setup (Run as Administrator).exe > /SILENT install has an OK button at end
             echo -e "\n${GREENTXT}Downloading VARA FM . . .${NORMTXT}\n"
@@ -349,91 +346,110 @@ function run_installvara()  # Download / extract / install VARA HF/FM/Chat, then
             7z x VARA\ FM*.zip -o"VARAFMInstaller"
             cp VARAFMInstaller/VARA\ FM\ setup*.exe ~/.wine/drive_c/ # move VARA installer here (so AHK can find it later)
             # VARA FM will be installed and configured with an AHK script later
-            
+
         # Download / extract / install VARA Chat
             # files: VARA Chat v1.2.5 Setup.zip > VARA Chat setup (Run as Administrator).exe > /SILENT install is silent
             echo -e "\n${GREENTXT}Downloading VARA Chat . . .${NORMTXT}\n"
             VARACHATLINK=$(curl -s https://rosmodem.wordpress.com/ | grep -oP '(?=https://mega.nz).*?(?=" target="_blank" rel="noopener noreferrer">VARA Chat v)') # Find the mega.nz link from the rosmodem website no matter its version, then store it as a variable
             megadl ${VARACHATLINK} || { echo "VARA Chat download failed!" && run_giveup; }
             7z x VARA\ Chat*.zip -o"VARAChatInstaller"
-            
+
             echo -e "\n${GREENTXT}Installing VARA Chat . . .${NORMTXT}\n"
             wine VARAChatInstaller/VARA\ Chat\ setup*.exe /SILENT # install VARA Chat
-            
+
         # TODO: Add VARA SAT
-            
-            # Make a VARA Chat desktop shortcut
-            echo '[Desktop Entry]'                                                                                            >> ~/Desktop/VARA\ Chat.desktop
-            echo 'Name=VARA Chat'                                                                                             >> ~/Desktop/VARA\ Chat.desktop
-            echo 'Exec=wine '$HOME'/.wine/drive_c/VARA/VARA\ Chat.exe'                                                        >> ~/Desktop/VARA\ Chat.desktop
-            echo 'Type=Application'                                                                                           >> ~/Desktop/VARA\ Chat.desktop
-            echo 'StartupNotify=true'                                                                                         >> ~/Desktop/VARA\ Chat.desktop
-            echo 'Icon=DF53_VARA Chat.0'                                                                                      >> ~/Desktop/VARA\ Chat.desktop
-            echo 'StartupWMClass=vara chat.exe'                                                                               >> ~/Desktop/VARA\ Chat.desktop
-            #cp ~/.local/share/applications/wine/Programs/VARA\ Chat/VARA.desktop ~/Desktop/VARA\ Chat.desktop # wine makes broken shortcuts sometimes
-            sudo chmod +x ~/Desktop/VARA\ Chat.desktop
+
+#############################################################################
+echo "
+[Desktop Entry]
+Name=VARA Chat
+Exec=wine \"${HOME}/.wine/drive_c/VARA/VARA Chat.exe\"
+Type=Application
+StartupNotify=true
+Icon=\"DF53_VARA Chat.0\"
+StartupWMClass=\"vara chat.exe\"" > "${HOME}/Desktop/VARA Chat.desktop"
+#############################################################################
+
+            chmod +x "${varaChatDesktopFile}"
     cd ..
-        
-    mkdir ahk; cd ahk
+
+    mkdir ahk && cd ahk || exit 1
         # Download AutoHotKey
             wget -q https://github.com/AutoHotkey/AutoHotkey/releases/download/v1.0.48.05/AutoHotkey104805_Install.exe || { echo "AutoHotKey download failed!" && run_giveup; }
             7z x AutoHotkey104805_Install.exe AutoHotkey.exe
             sudo chmod +x AutoHotkey.exe
-        
+
         # Install VARA HF silently
             # Create varahf_install.ahk
             # The VARA installer prompts the user to hit 'OK' even during silent install (due to a secondary installer).  We will suppress this prompt with AHK.
-            echo '; AHK script to make VARA installer run completely silent'                       >> varahf_install.ahk
-            echo 'SetTitleMatchMode, 2'                                                            >> varahf_install.ahk
-            echo 'SetTitleMatchMode, slow'                                                         >> varahf_install.ahk
-            echo '        Run, VARA setup (Run as Administrator).exe /SILENT, C:\'                 >> varahf_install.ahk
-            echo '        WinWait, VARA Setup ; Wait for the "VARA installed successfully" window' >> varahf_install.ahk
-            echo '        ControlClick, Button1, VARA Setup ; Click the OK button'                 >> varahf_install.ahk
-            echo '        WinWaitClose'                                                            >> varahf_install.ahk
+
+#############################################################################
+echo '
+; AHK script to make VARA installer run completely silent
+SetTitleMatchMode, 2
+SetTitleMatchMode, slow
+Run, VARA setup (Run as Administrator).exe /SILENT, C:\
+WinWait, VARA Setup ; Wait for the "VARA installed successfully" window
+ControlClick, Button1, VARA Setup ; Click the OK button
+WinWaitClose' > varahf_install.ahk
+#############################################################################
 
             # Run varahf_install.ahk
             echo -e "\n${GREENTXT}Installing VARA HF . . .${NORMTXT}\n"
             BOX86_NOBANNER=1 BOX86_DYNAREC_BIGBLOCK=0 wine AutoHotkey.exe varahf_install.ahk # install VARA silently using AHK
             rm ~/.wine/drive_c/VARA\ setup*.exe # clean up
-            
+
             # Make a VARA HF desktop shortcut
-            echo '[Desktop Entry]'                                                                 >> ~/Desktop/VARA.desktop
-            echo 'Name=VARA'                                                                       >> ~/Desktop/VARA.desktop
-            echo 'Exec=wine '$HOME'/.wine/drive_c/VARA/VARA.exe'                                   >> ~/Desktop/VARA.desktop
-            echo 'Type=Application'                                                                >> ~/Desktop/VARA.desktop
-            echo 'StartupNotify=true'                                                              >> ~/Desktop/VARA.desktop
-            echo 'Icon=F302_VARA.0'                                                                >> ~/Desktop/VARA.desktop
-            echo 'StartupWMClass=vara.exe'                                                         >> ~/Desktop/VARA.desktop
+
+#############################################################################
+echo '
+[Desktop Entry]
+Name=VARA
+Exec=wine '$HOME'/.wine/drive_c/VARA/VARA.exe
+Type=Application
+StartupNotify=true
+Icon=F302_VARA.0
+StartupWMClass=vara.exe' > ~/Desktop/VARA.desktop
+#############################################################################
+
             #cp ~/.local/share/applications/wine/Programs/VARA/VARA.desktop ~/Desktop/ # wine makes broken shortcuts sometimes
-            sudo chmod +x ~/Desktop/VARA.desktop
-        
+            chmod +x ~/Desktop/VARA.desktop
+
         # Install VARA FM silently
             # Create/run varafm_install.ahk
             # The VARA installer prompts the user to hit 'OK' even during silent install (due to a secondary installer).  We will suppress this prompt with AHK.
-            echo '; AHK script to make VARA installer run completely silent'                       >> varafm_install.ahk
-            echo 'SetTitleMatchMode, 2'                                                            >> varafm_install.ahk
-            echo 'SetTitleMatchMode, slow'                                                         >> varafm_install.ahk
-            echo '        Run, VARA FM setup (Run as Administrator).exe /SILENT, C:\'              >> varafm_install.ahk
-            echo '        WinWait, VARA Setup ; Wait for the "VARA installed successfully" window' >> varafm_install.ahk
-            echo '        ControlClick, Button1, VARA Setup ; Click the OK button'                 >> varafm_install.ahk
-            echo '        WinWaitClose'                                                            >> varafm_install.ahk
-            
+
+#############################################################################
+echo '
+; AHK script to make VARA installer run completely silent
+SetTitleMatchMode, 2
+SetTitleMatchMode, slow
+Run, VARA FM setup (Run as Administrator).exe /SILENT, C:\
+WinWait, VARA Setup ; Wait for the "VARA installed successfully" window
+ControlClick, Button1, VARA Setup ; Click the OK button
+WinWaitClose' > varafm_install.ahk
+#############################################################################
+
             # Run varafm_install.ahk
             echo -e "\n${GREENTXT}Installing VARA FM . . .${NORMTXT}\n"
             BOX86_NOBANNER=1 BOX86_DYNAREC_BIGBLOCK=0 wine AutoHotkey.exe varafm_install.ahk # install VARA silently using AHK
             rm ~/.wine/drive_c/VARA\ FM\ setup*.exe # clean up
-            
+
             # Make a VARA FM desktop shortcut
-            echo '[Desktop Entry]'                                                                 >> ~/Desktop/VARA\ FM.desktop
-            echo 'Name=VARA FM'                                                                    >> ~/Desktop/VARA\ FM.desktop
-            echo 'Exec=wine '$HOME'/.wine/drive_c/VARA\ FM/VARAFM.exe'                             >> ~/Desktop/VARA\ FM.desktop
-            echo 'Type=Application'                                                                >> ~/Desktop/VARA\ FM.desktop
-            echo 'StartupNotify=true'                                                              >> ~/Desktop/VARA\ FM.desktop
-            echo 'Icon=C497_VARAFM.0'                                                              >> ~/Desktop/VARA\ FM.desktop
-            echo 'StartupWMClass=varafm.exe'                                                       >> ~/Desktop/VARA\ FM.desktop
+
+#############################################################################
+echo "[Desktop Entry]
+Name=VARA FM
+Exec=wine \"${HOME}/.wine/drive_c/VARA FM/VARAFM.exe\"
+Type=Application
+StartupNotify=true
+Icon=C497_VARAFM.0
+StartupWMClass=varafm.exe" > ~/Desktop/VARA\ FM.desktop
+#############################################################################
+
             #cp ~/.local/share/applications/wine/Programs/VARA\ FM/VARA\ FM.desktop ~/Desktop/ # wine makes broken shortcuts sometimes
-            sudo chmod +x ~/Desktop/VARA\ FM.desktop
-        
+            chmod +x ~/Desktop/VARA\ FM.desktop
+
         # Guide the user to the VARA HF audio setup menu (configure hardware soundcard input/output)
             echo -e "\n${GREENTXT}Configuring VARA HF . . .${NORMTXT}\n"
             sudo apt-get install zenity -y
@@ -446,26 +462,31 @@ function run_installvara()  # Download / extract / install VARA HF/FM/Chat, then
             # We will disable all graphics except gauges to help RPi4 CPU. Users can enable these if they have better CPU
             # We will then open the soundcard menu for users so that they can set up their sound cards
             # After the settings menu is closed, we will close VARA HF
-            echo '; AHK script to assist users in setting up VARA on its first run'                >> varahf_configure.ahk
-            echo 'SetTitleMatchMode, 2'                                                            >> varahf_configure.ahk
-            echo 'SetTitleMatchMode, slow'                                                         >> varahf_configure.ahk
-            echo '        Run, VARA.exe, C:\VARA'                                                  >> varahf_configure.ahk
-            echo '        WinActivate, VARA HF'                                                    >> varahf_configure.ahk
-            echo '        WinWait, VARA HF ; Wait for VARA HF to open'                             >> varahf_configure.ahk
-            echo '        Sleep 2500 ; If we dont wait at least 2000 for VARA then AHK wont work'  >> varahf_configure.ahk
-            echo '        Send, !{s} ; Open SoundCard menu for user to set up sound cards'         >> varahf_configure.ahk
-            echo '        Sleep 500'                                                               >> varahf_configure.ahk
-            echo '        Send, {Down}'                                                            >> varahf_configure.ahk
-            echo '        Sleep, 100'                                                              >> varahf_configure.ahk
-            echo '        Send, {Enter}'                                                           >> varahf_configure.ahk
-            echo '        Sleep 5000'                                                              >> varahf_configure.ahk
-            echo '        WinWaitClose, SoundCard ; Wait for user to finish setting up soundcard'  >> varahf_configure.ahk
-            echo '        Sleep 100'                                                               >> varahf_configure.ahk
-            echo '        WinClose, VARA HF ; Close VARA'                                          >> varahf_configure.ahk
+
+#############################################################################
+echo '
+; AHK script to assist users in setting up VARA on its first run
+SetTitleMatchMode, 2
+SetTitleMatchMode, slow
+Run, VARA.exe, C:\VARA
+WinActivate, VARA HF
+WinWait, VARA HF ; Wait for VARA HF to open
+Sleep 2500 ; If we dont wait at least 2000 for VARA then AHK wont work
+Send, !{s} ; Open SoundCard menu for user to set up sound cards
+Sleep 500
+Send, {Down}
+Sleep, 100
+Send, {Enter}
+Sleep 5000
+WinWaitClose, SoundCard ; Wait for user to finish setting up soundcard
+Sleep 100
+WinClose, VARA HF ; Close VARA' > varahf_configure.ahk
+#############################################################################
+
             BOX86_NOBANNER=1 BOX86_DYNAREC_BIGBLOCK=0 wine AutoHotkey.exe varahf_configure.ahk # nobanner option to make console prettier
             sleep 5
             sed -i 's+View\=1+View\=3+g' ~/.wine/drive_c/VARA/VARA.ini # turn off VARA HF's waterfall (change 'View=1' to 'View=3' in VARA.ini). INI file shows up after first run of VARA HF.
-        
+
         # Guide the user to the VARA FM audio setup menu (configure hardware soundcard input/output)
             sudo apt-get install zenity -y
             clear
@@ -477,37 +498,47 @@ function run_installvara()  # Download / extract / install VARA HF/FM/Chat, then
             # We will disable all graphics except gauges to help RPi4 CPU. Users can enable these if they have better CPU
             # We will then open the soundcard menu for users so that they can set up their sound cards
             # After the settings menu is closed, we will close VARA FM
-            echo '; AHK script to assist users in setting up VARA on its first run'                >> varafm_configure.ahk
-            echo 'SetTitleMatchMode, 2'                                                            >> varafm_configure.ahk
-            echo 'SetTitleMatchMode, slow'                                                         >> varafm_configure.ahk
-            echo '        Run, VARAFM.exe, C:\VARA FM'                                             >> varafm_configure.ahk
-            echo '        WinActivate, VARA FM'                                                    >> varafm_configure.ahk
-            echo '        WinWait, VARA FM ; Wait for VARA FM to open'                             >> varafm_configure.ahk
-            echo '        Sleep 2000 ; If we dont wait at least 2000 for VARA then AHK wont work'  >> varafm_configure.ahk
-            echo '        Send, !{s} ; Open SoundCard menu for user to set up sound cards'         >> varafm_configure.ahk
-            echo '        Sleep 500'                                                               >> varafm_configure.ahk
-            echo '        Send, {Down}'                                                            >> varafm_configure.ahk
-            echo '        Sleep, 100'                                                              >> varafm_configure.ahk
-            echo '        Send, {Enter}'                                                           >> varafm_configure.ahk
-            echo '        Sleep 5000'                                                              >> varafm_configure.ahk
-            echo '        WinWaitClose, SoundCard ; Wait for user to finish setting up soundcard'  >> varafm_configure.ahk
-            echo '        Sleep 100'                                                               >> varafm_configure.ahk
-            echo '        WinClose, VARA FM ; Close VARA'                                          >> varafm_configure.ahk
+
+#############################################################################
+echo '
+; AHK script to assist users in setting up VARA on its first run
+SetTitleMatchMode, 2
+SetTitleMatchMode, slow
+Run, VARAFM.exe, C:\VARA FM
+WinActivate, VARA FM
+WinWait, VARA FM ; Wait for VARA FM to open
+Sleep 2000 ; If we dont wait at least 2000 for VARA then AHK wont work
+Send, !{s} ; Open SoundCard menu for user to set up sound cards
+Sleep 500
+Send, {Down}
+Sleep, 100
+Send, {Enter}
+Sleep 5000
+WinWaitClose, SoundCard ; Wait for user to finish setting up soundcard
+Sleep 100
+WinClose, VARA FM ; Close VARA' > varafm_configure.ahk
+#############################################################################
+
             BOX86_NOBANNER=1 BOX86_DYNAREC_BIGBLOCK=0 wine AutoHotkey.exe varafm_configure.ahk # Nobanner option to make console prettier
             sleep 5
             sed -i 's+View\=1+View\=3+g' ~/.wine/drive_c/VARA\ FM/VARAFM.ini # turn off VARA FM's graphics (change 'View=1' to 'View=3' in VARAFM.ini). INI file shows up after first run of VARA FM.
     cd ..
-    
+
     # In older versions of wine, this fixed graphics glitches caused by Wine's (winecfg) window manager (VARA appeared as a black screen when auto-run by RMS Express)
         # NOTE: If using dotnet (instead of wine-mono) on Pi, this will slow things down a lot
         # Create override-x11.reg
-        echo 'REGEDIT4'                                      >> override-x11.reg
-        echo ''                                              >> override-x11.reg
-        echo '[HKEY_CURRENT_USER\Software\Wine\X11 Driver]'  >> override-x11.reg
-        echo '"Decorated"="Y"'                               >> override-x11.reg
-        echo '"Managed"="N"'                                 >> override-x11.reg
-        wine cmd /c regedit /s override-x11.reg
-    
+
+#############################################################################
+echo '
+REGEDIT4
+
+[HKEY_CURRENT_USER\Software\Wine\X11 Driver]
+"Decorated"="Y"
+"Managed"="N"' > override-x11.reg
+#############################################################################
+
+         wine cmd /c regedit /s override-x11.reg
+
     # Install dll's needed by users of "RA-boards," like the DRA-50
     #  https://masterscommunications.com/products/radio-adapter/dra/dra-index.html
         sudo apt install p7zip-full -y
@@ -515,7 +546,7 @@ function run_installvara()  # Download / extract / install VARA HF/FM/Chat, then
         wget http://uz7.ho.ua/modem_beta/ptt-dll.zip
         7z x ptt-dll.zip -o"$HOME/.wine/drive_c/VARA/" # For VARA HF & VARAChat
         7z x ptt-dll.zip -o"$HOME/.wine/drive_c/VARA FM/" # For VARA FM
-        
+
 }
 
 function run_installvARIM()  # Download, build, and install an open-source stand-alone interface for VARA, called vARIM
@@ -525,15 +556,15 @@ function run_installvARIM()  # Download, build, and install an open-source stand
     sudo apt-get install gcc cmake zlibc libfltk1.3-dev libfltk-images1.3 -y # build dependencies
     wget -q https://www.whitemesa.net/varim/src/varim-1.4.tar.gz || { echo "vARIM Sourcecode download failed!" && run_giveup; } # "Current vARIM Version 1.4 source code and help file"
     tar -xzvf varim-1.4.tar.gz
-    cd varim-1.4
+    cd varim-1.4 || exit 1
             ./configure
-            make -j$(nproc)
+            make -j "$(nproc)"
             sudo make install
             sudo chmod 644 ~/varim/varim.ini
     cd ..
     rm -rf varim-1.4
     cp /usr/local/share/applications/varim.desktop ~/Desktop/varim.desktop
-    sudo chmod +x ~/Desktop/varim.desktop
+    chmod +x ~/Desktop/varim.desktop
 
     ## Download and install vARIM for RPi3B+ or RPi4B
     # THIS IS BROKEN - vARIM pre-made packages are 'portable' and thus can't be installed into /usr/local/bin like the compiled version.
@@ -562,26 +593,29 @@ function run_makewineserverkscript()  # Make a script for the desktop that will 
 {
     sudo apt-get install zenity -y
     # Create 'Reset\ Wine.sh'
-        echo '#!/bin/bash'   >> ~/Desktop/Reset\ Wine
-        echo ''              >> ~/Desktop/Reset\ Wine
-        echo 'wineserver -k' >> ~/Desktop/Reset\ Wine
-        echo 'zenity --info --timeout=8 --height 150 --width 500 --text="Wine has been reset so that Winlink Express and VARA will run again.\\n\\nIf you try to run RMS Express again and it crashes or doesn'\''t open, just keep trying to run it.  It should open eventually after enough tries." --title="Wine has been reset"'          >> ~/Desktop/Reset\ Wine
-        sudo chmod +x ~/Desktop/Reset\ Wine
+
+echo '
+#!/bin/bash   >> ~/Desktop/Reset\ Wine
+
+wineserver -k
+zenity --info --timeout=8 --height 150 --width 500 --text="Wine has been reset so that Winlink Express and VARA will run again.\\n\\nIf you try to run RMS Express again and it crashes or doesn'\''t open, just keep trying to run it.  It should open eventually after enough tries." --title="Wine has been reset"' > ~/Desktop/Reset\ Wine
+
+        chmod +x ~/Desktop/Reset\ Wine
 }
 
 function run_makevaraupdatescript()
 {
 	# Create 'Update\ VARA.sh'
-	
+
 	# Inject code into a new script that can be run later from the desktop by users who wish to update VARA HF, VARA FM, and VARAChat
 	#   Note that this script uses tabs (	) instead of spaces ( ) for formatting since it relies on heredoc (i.e. eom & eot).
 	#   Also note that none of this code gets run right now.
 	cat > $HOME/Desktop/Update\ VARA <<- 'EOM'
 		#!/bin/bash
-		
+
 		sudo apt-get install zenity curl megatools p7zip-full -y &
 		sudo rm -rf ~/vara_update_files 2>/dev/null # remove any failed vara update attempts
-		
+
 		if zenity --question --height 150 --width 500 --text="Would you like to update VARA HF, VARA FM, and VARA Chat?\\n\\n(RMS Express already checks for updates on its own)" --title="Update VARA Suite?"
 		then
 			zenity --warning --timeout=16 --height 150 --width 500 --text="Updating VARA HF, VARA FM, and VARA Chat now ...\\n\\nThis may take a moment." --title="Updating VARA Suite" &
@@ -635,7 +669,7 @@ function run_makevaraupdatescript()
 						echo 'Icon=F302_VARA.0'																	>> ~/Desktop/VARA.desktop
 						echo 'StartupWMClass=vara.exe'															>> ~/Desktop/VARA.desktop
 						#cp ~/.local/share/applications/wine/Programs/VARA/VARA.desktop ~/Desktop/ # wine makes broken shortcuts sometimes
-						sudo chmod +x ~/Desktop/VARA.desktop
+						chmod +x ~/Desktop/VARA.desktop
 
 					# Install VARA FM silently
 						# Create/run varafm_install.ahk
@@ -669,30 +703,36 @@ function run_makevaraupdatescript()
 			: # do nothing
 		fi
 	EOM
-	sudo chmod +x ~/Desktop/Update\ VARA
+    chmod +x ~/Desktop/Update\ VARA
 }
 
 function run_detect_arch()  # Finds what kind of processor we're running (aarch64, armv8l, armv7l, x86_64, x86, etc)
 {
-    KARCH=$(uname -m) # don't use 'arch' since it is not supported by Termux
-    
-    if [ "$KARCH" = "aarch64" ] || [ "$KARCH" = "aarch64-linux-gnu" ] || [ "$KARCH" = "arm64" ] || [ "$KARCH" = "aarch64_be" ]; then
-        ARCH=ARM64
-        #echo -e "\nDetected an ARM processor running in 64-bit mode (detected ARM64)."
-    elif [ "$KARCH" = "armv8r" ] || [  "$KARCH" = "armv8l" ] || [  "$KARCH" = "armv7l" ] || [  "$KARCH" = "armhf" ] || [  "$KARCH" = "armel" ] || [  "$KARCH" = "armv8l-linux-gnu" ] || [  "$KARCH" = "armv7l-linux-gnueabi" ] || [  "$KARCH" = "armv7l-linux-gnueabihf" ] || [  "$KARCH" = "armv7a-linux-gnueabi" ] || [  "$KARCH" = "armv7a-linux-gnueabihf" ] || [  "$KARCH" = "armv7-linux-androideabi" ] || [  "$KARCH" = "arm-linux-gnueabi" ] || [  "$KARCH" = "arm-linux-gnueabihf" ] || [  "$KARCH" = "arm-none-eabi" ] || [  "$KARCH" = "arm-none-eabihf" ]; then
-        ARCH=ARM32
-        #echo -e "\nDetected an ARM processor running in 32-bit mode (detected ARM32)."
-    elif [ "$KARCH" = "x86_64" ]; then
-        ARCH=x64
-        #echo -e "\nDetected an x86_64 processor running in 64-bit mode (detected x64)."
-    elif [ "$KARCH" = "x86" ] || [ "$KARCH" = "i386" ] || [ "$KARCH" = "i686" ]; then
-        ARCH=x86
-        #echo -e "\nDetected an x86 (or x86_64) processor running in 32-bit mode (detected x86)."
-    else
-        echo "Error: Could not identify processor architecture.">&2
-        run_giveup
-    fi
-    
+    readonly KARCH=$(uname -m) # don't use 'arch' since it is not supported by Termux
+
+    case ${KARCH} in \
+        aarch64*|arm64)
+            ARCH=ARM64
+            #echo -e "\nDetected an ARM processor running in 64-bit mode (detected ARM64)."
+            ;;
+        armv7*|armv8*|arm-none*)
+            ARCH=ARM32
+            #echo -e "\nDetected an ARM processor running in 32-bit mode (detected ARM32)."
+            ;;
+        x86_64)
+            ARCH=x64
+            #echo -e "\nDetected an x86_64 processor running in 64-bit mode (detected x64)."
+            ;;
+        x86|i386|i686)
+            ARCH=x86
+            #echo -e "\nDetected an x86 (or x86_64) processor running in 32-bit mode (detected x86)."
+            ;;
+        *)
+            echo "Error: Could not identify processor architecture." >&2
+            run_giveup
+            ;;
+    esac
+
     # References:
     #   https://unix.stackexchange.com/questions/136407/is-my-linux-arm-32-or-64-bit
     #   https://bgamari.github.io/posts/2019-06-12-arm-terminology.html
@@ -707,51 +747,22 @@ function run_detect_arch()  # Finds what kind of processor we're running (aarch6
     #   Exagear RPi3/4 (32bit modified qemu chroot): i686 (if I remember correctly)
 }
 
-function run_gather_os_info()
-{
-    # To my knowledge . . .
-    #    Most post-2012 distros should have a standard '/etc/os-release' file for finding OS
-    #    Pre-2012 distros (& small distros) may not have a canonical way of finding OS.
-    #
-    # Each release file has its own 'standard' vars, but five highly-conserved vars in all(?) os-release files are ...
-    #    NAME="Alpine Linux"
-    #    ID=alpine
-    #    VERSION_ID=3.8.1
-    #    PRETTY_NAME="Alpine Linux v3.8"
-    #    HOME_URL="http://alpinelinux.org"
-    #
-    # Other known os-release file vars are listed here: https://docs.google.com/spreadsheets/d/1ixz0PfeWJ-n8eshMQN0BVoFAFnUmfI5HIMyBA0uK43o/edit#gid=0
-    #
-    # In general, we need to know: $ID (distro) & $VERSION_ID (distro version) into order to add Wine repo's for certain distro's/versions.
-    # If $VERSION_CODENAME is available then we should probably use this for figuring out which repo to use
-    #
-    # We will also have to determine package manager later, which we might try to do multiple ways (whitelist based on distro/version vs runtime detection)
-
-    # Try to find the os-release file on Linux systems
-    if [ -e /etc/os-release ];       then OS_INFOFILE='/etc/os-release'     && echo "Found an OS info file located at ${OS_INFOFILE}"
-    elif [ -e /usr/lib/os-release ]; then OS_INFOFILE='/usr/lib/os-release' && echo "Found an OS info file located at ${OS_INFOFILE}"
-    elif [ -e /etc/*elease ];        then OS_INFOFILE='/etc/*elease'        && echo "Found an OS info file located at ${OS_INFOFILE}"
-    # Add mac OS  https://apple.stackexchange.com/questions/255546/how-to-find-file-release-in-os-x-el-capitan-10-11-6
-    # Add chrome OS
-    # Add chroot Android? (uname -o  can be used to find "Android")
-    else OS_INFOFILE='' && echo "No Linux OS info files could be found!">&2 && run_giveup;
-    fi
-    
-    # Load OS-Release File vars into memory (reads vars like "NAME", "ID", "VERSION_ID", "PRETTY_NAME", and "HOME_URL")
-    source "${OS_INFOFILE}"
-}
-
 function run_giveup()  # If our script failed at any critical stages, notify the user and quit
 {
-     echo ""
-     echo "Installation failed."
-     echo ""
-     echo "For help, please reference the 'winelink.log' file"
-     echo "You can also open an issue on github.com/WheezyE/Winelink/"
-     echo ""
-     read -n 1 -s -r -p "Press any key to quit . . ."
-     echo ""
-     exit
+
+	cat <<- __EOF__
+
+		Installation failed.
+
+		For help, please reference the 'winelink.log' file
+		You can also open an issue on github.com/WheezyE/Winelink/
+
+	__EOF__
+
+    read -n 1 -s -r -p "Press any key to quit . . ."
+    echo
+
+    exit 1
 }
 
 # Set optional text colors
@@ -760,4 +771,5 @@ NORMTXT='\e[0m' # Normal
 BRIGHT='\e[7m' # Highlighted
 NORMAL='\e[0m' # Non-highlighted
 
+### MAIN
 run_main "$@"; exit # Run the "run_main" function after all other functions have been defined in bash.  This allows us to keep our main code at the top of the script.
